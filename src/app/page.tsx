@@ -8,15 +8,15 @@ const mascotas = [
     nombre: "Max",
     tipo: "Perro",
     edad: "2 años",
-    emoji: "🐕",
+    imagen: "/mascotas/Toby (4).png",
     descripcion: "Cariñoso, juguetón y muy amigable.",
   },
   {
     id: 2,
     nombre: "Zeus",
-    tipo: "Gata",
+    tipo: "Gato",
     edad: "1 año",
-    emoji: "🐈",
+    imagen: "/mascotas/Toby (2).png",
     descripcion: "Tranquila, cariñosa y muy tierna.",
   },
   {
@@ -24,7 +24,7 @@ const mascotas = [
     nombre: "Rocky",
     tipo: "Perro",
     edad: "3 años",
-    emoji: "🐕‍🦺",
+    imagen: "/mascotas/Toby (5).png",
     descripcion: "Protector, alegre y lleno de energía.",
   },
   {
@@ -32,7 +32,7 @@ const mascotas = [
     nombre: "Luna",
     tipo: "Gata",
     edad: "8 meses",
-    emoji: "🐱",
+    imagen: "/mascotas/Toby (3).png",
     descripcion: "Dulce, curiosa y muy cariñosa.",
   },
   {
@@ -40,7 +40,7 @@ const mascotas = [
     nombre: "Toby",
     tipo: "Perro",
     edad: "1 año",
-    emoji: "🐶",
+    imagen: "/mascotas/Toby (1).png",
     descripcion: "Juguetón, obediente y lleno de alegría.",
   },
 ];
@@ -230,11 +230,14 @@ export default function Home() {
               className="overflow-hidden rounded-2xl bg-white shadow-md transition duration-300 hover:-translate-y-2 hover:shadow-xl"
             >
 
-              {/* IMAGEN PROVISIONAL DE LA MASCOTA */}
-              <div className="flex h-56 items-center justify-center bg-orange-100 text-8xl">
-                {mascota.emoji}
+              {/* IMAGEN DE LA MASCOTA */}
+              <div className="h-56 overflow-hidden bg-orange-100">
+                <img
+                  src={mascota.imagen}
+                  alt={`Foto de ${mascota.nombre}`}
+                  className="h-full w-full object-cover"
+                />
               </div>
-
 
               {/* INFORMACIÓN DE LA MASCOTA */}
               <div className="p-6">
