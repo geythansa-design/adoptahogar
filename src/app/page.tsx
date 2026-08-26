@@ -94,9 +94,12 @@ export default function Home() {
           </div>
 
           {/* BOTÓN DE INICIO DE SESIÓN */}
-          <button className="rounded-full bg-orange-500 px-5 py-2 font-semibold text-white transition hover:bg-orange-600">
+          <a
+            href="/login"
+            className="rounded-full bg-orange-500 px-5 py-2 font-semibold text-white transition hover:bg-orange-600"
+          >
             Iniciar sesión
-          </button>
+          </a>
         </div>
       </nav>
 
@@ -135,9 +138,12 @@ export default function Home() {
                 🐶 Ver mascotas
               </a>
 
-              <button className="rounded-full border-2 border-orange-500 px-7 py-3 font-bold text-orange-600 transition hover:bg-orange-100">
+              <a
+                href="/explorar"
+                className="rounded-full border-2 border-orange-500 px-7 py-3 font-bold text-orange-600 transition hover:bg-orange-100"
+              >
                 ❤️ Quiero adoptar
-              </button>
+              </a>
 
             </div>
           </div>

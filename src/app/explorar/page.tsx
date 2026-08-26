@@ -1,6 +1,6 @@
 const mascotas = [
     {
-        id: 1,
+        id: 2,
         nombre: "Max",
         tipo: "Perro",
         edad: "2 años",
@@ -8,15 +8,15 @@ const mascotas = [
         descripcion: "Cariñoso, juguetón y muy amigable.",
     },
     {
-        id: 2,
+        id: 3,
         nombre: "Zeus",
         tipo: "Gato",
         edad: "1 año",
         imagen: "/mascotas/Toby (2).png",
-        descripcion: "Tranquila, cariñosa y muy tierna.",
+        descripcion: "Tranquilo, cariñoso y muy tierno.",
     },
     {
-        id: 3,
+        id: 4,
         nombre: "Rocky",
         tipo: "Perro",
         edad: "3 años",
@@ -24,7 +24,7 @@ const mascotas = [
         descripcion: "Protector, alegre y lleno de energía.",
     },
     {
-        id: 4,
+        id: 5,
         nombre: "Luna",
         tipo: "Gata",
         edad: "8 meses",
@@ -32,7 +32,7 @@ const mascotas = [
         descripcion: "Dulce, curiosa y muy cariñosa.",
     },
     {
-        id: 5,
+        id: 6,
         nombre: "Toby",
         tipo: "Perro",
         edad: "1 año",
