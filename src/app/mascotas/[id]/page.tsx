@@ -54,14 +54,22 @@ interface MascotaDetalleProps {
     params: {
         id: string;
     };
+    searchParams: {
+        tipo?: string;
+    };
 }
 
 export default function MascotaDetallePage({
     params,
+    searchParams,
 }: MascotaDetalleProps) {
     const mascota = mascotas.find(
         (item) => item.id === Number(params.id)
     );
+
+    const volverA = searchParams.tipo
+        ? `/explorar?tipo=${searchParams.tipo}`
+        : "/explorar";
 
     if (!mascota) {
         return (
@@ -76,10 +84,10 @@ export default function MascotaDetallePage({
                     </p>
 
                     <a
-                        href="/explorar"
-                        className="mt-8 inline-block rounded-full bg-orange-500 px-6 py-3 font-bold text-white transition hover:bg-orange-600"
+                        href={volverA}
+                        className="rounded-full bg-orange-500 px-5 py-2 font-semibold text-white transition hover:bg-orange-600"
                     >
-                        ← Volver a mascotas
+                        ← Volver
                     </a>
                 </div>
             </main>
@@ -100,10 +108,10 @@ export default function MascotaDetallePage({
                     </div>
 
                     <a
-                        href="/explorar"
+                        href={volverA}
                         className="rounded-full bg-orange-500 px-5 py-2 font-semibold text-white transition hover:bg-orange-600"
                     >
-                        ← Volver a mascotas
+                        ← Volver
                     </a>
                 </div>
             </nav>

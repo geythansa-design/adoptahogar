@@ -41,7 +41,21 @@ const mascotas = [
     },
 ];
 
-export default function ExplorarPage() {
+export default function ExplorarPage({
+    searchParams,
+}: {
+    searchParams: { tipo?: string };
+}) {
+    const tipoSeleccionado = searchParams.tipo;
+
+    const mascotasFiltradas = tipoSeleccionado
+        ? mascotas.filter((mascota) =>
+            tipoSeleccionado === "Gato"
+                ? mascota.tipo === "Gato" || mascota.tipo === "Gata"
+                : mascota.tipo === tipoSeleccionado
+        )
+        : mascotas;
+
     return (
         <main className="min-h-screen bg-orange-50 text-gray-800">
             {/* ENCABEZADO */}
@@ -83,7 +97,7 @@ export default function ExplorarPage() {
 
                 {/* TARJETAS */}
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    {mascotas.map((mascota) => (
+                    {mascotasFiltradas.map((mascota) => (
                         <div
                             key={mascota.id}
                             className="overflow-hidden rounded-2xl bg-white shadow-md transition duration-300 hover:-translate-y-2 hover:shadow-xl"
@@ -97,29 +111,15 @@ export default function ExplorarPage() {
                             </div>
 
                             <div className="p-6">
-                                <div className="flex items-center justify-between gap-3">
-                                    <h3 className="text-2xl font-bold text-gray-900">
-                                        {mascota.nombre}
-                                    </h3>
-
-                                    <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-600">
-                                        {mascota.tipo}
-                                    </span>
-                                </div>
-
-                                <p className="mt-2 text-gray-600">
-                                    🐾 {mascota.tipo} · {mascota.edad}
-                                </p>
-
-                                <p className="mt-3 text-sm text-gray-500">
-                                    {mascota.descripcion}
-                                </p>
+                                <h3 className="text-2xl font-bold text-gray-900 text-center">
+                                    {mascota.nombre}
+                                </h3>
 
                                 <a
-                                    href={`/mascotas/${mascota.id}`}
+                                    href={`/mascotas/${mascota.id}?tipo=${tipoSeleccionado || mascota.tipo}`}
                                     className="mt-5 block w-full rounded-lg bg-orange-500 py-3 text-center font-semibold text-white transition hover:bg-orange-600"
                                 >
-                                    Conocer a {mascota.nombre}
+                                    Ver mascota
                                 </a>
                             </div>
                         </div>
