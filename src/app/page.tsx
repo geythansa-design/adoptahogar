@@ -91,8 +91,8 @@ export default function Home() {
 
               <div
                 className={`absolute left - 0 top - full z - 50 mt - 2 w - 40 rounded - xl bg - white py - 2 shadow - lg transition - all duration - 200 ${menuMascotasAbierto
-                    ? "visible opacity-100"
-                    : "invisible opacity-0 group-hover:visible group-hover:opacity-100"
+                  ? "visible opacity-100"
+                  : "invisible opacity-0 group-hover:visible group-hover:opacity-100"
                   } `}
               >
                 <a
@@ -160,14 +160,8 @@ export default function Home() {
               siempre.
             </p>
 
-            {/* BOTONES */}
+            {/* BOTÓN PRINCIPAL */}
             <div className="mt-8 flex flex-wrap gap-4">
-              <a
-                href="/explorar"
-                className="rounded-full bg-orange-500 px-7 py-3 font-bold text-white shadow-md transition hover:bg-orange-600"
-              >
-                🐶 Ver mascotas
-              </a>
 
               <a
                 href="/explorar"
@@ -175,6 +169,7 @@ export default function Home() {
               >
                 ❤️ Quiero adoptar
               </a>
+
             </div>
           </div>
 

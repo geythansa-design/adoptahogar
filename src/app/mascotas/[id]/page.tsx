@@ -85,7 +85,7 @@ export default function MascotaDetallePage({
 
                     <a
                         href={volverA}
-                        className="rounded-full bg-orange-500 px-5 py-2 font-semibold text-white transition hover:bg-orange-600"
+                        className="mt-6 inline-block rounded-full bg-orange-500 px-5 py-2 font-semibold text-white transition hover:bg-orange-600"
                     >
                         ← Volver
                     </a>
@@ -119,6 +119,7 @@ export default function MascotaDetallePage({
             {/* DETALLE */}
             <section className="mx-auto max-w-5xl px-6 py-16">
                 <div className="grid overflow-hidden rounded-3xl bg-white shadow-xl md:grid-cols-2">
+
                     {/* IMAGEN */}
                     <div className="h-[450px] bg-orange-100">
                         <img
@@ -130,6 +131,7 @@ export default function MascotaDetallePage({
 
                     {/* INFORMACIÓN */}
                     <div className="flex flex-col justify-center p-8 md:p-12">
+
                         <span className="w-fit rounded-full bg-orange-100 px-4 py-2 text-sm font-semibold text-orange-600">
                             🐾 {mascota.tipo}
                         </span>
@@ -139,30 +141,13 @@ export default function MascotaDetallePage({
                         </h2>
 
                         <p className="mt-4 text-lg text-gray-600">
-                            🐾 {mascota.tipo} · {mascota.edad}
+                            Edad: {mascota.edad}
                         </p>
 
                         <p className="mt-6 text-lg leading-relaxed text-gray-600">
                             {mascota.descripcion}
                         </p>
 
-                        <div className="mt-8 rounded-2xl bg-orange-50 p-5">
-                            <p className="font-semibold text-gray-900">
-                                ❤️ ¿Quieres darle un hogar?
-                            </p>
-
-                            <p className="mt-2 text-sm text-gray-600">
-                                Puedes iniciar el proceso de adopción y conocer más sobre
-                                {` ${mascota.nombre}`}.
-                            </p>
-                        </div>
-
-                        <a
-                            href={`/solicitud?mascota=${mascota.id}&nombre=${encodeURIComponent(mascota.nombre)}`}
-                            className="mt-8 block rounded-full bg-orange-500 px-7 py-3 text-center font-bold text-white shadow-md transition hover:bg-orange-600"
-                        >
-                            ❤️ Quiero adoptar a {mascota.nombre}
-                        </a>
                     </div>
                 </div>
             </section>

@@ -20,6 +20,7 @@ type Mascota = {
 
 export default function DashboardPage() {
     const [email, setEmail] = useState("");
+    const [rol, setRol] = useState("");
     const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
     const [mascotas, setMascotas] = useState<Mascota[]>([]);
     const [cargando, setCargando] = useState(true);
@@ -46,6 +47,28 @@ export default function DashboardPage() {
 
             setEmail(usuario.email ?? "");
 
+            // ============================
+            // OBTENER ROL DEL USUARIO
+            // ============================
+            const { data: perfil, error: errorPerfil } =
+                await supabase
+                    .from("perfiles")
+                    .select("rol")
+                    .eq("id", usuario.id)
+                    .single();
+
+            if (errorPerfil) {
+                console.error(errorPerfil);
+                setError("No se pudo cargar el perfil del usuario.");
+                setCargando(false);
+                return;
+            }
+
+            setRol(perfil?.rol ?? "");
+
+            // ============================
+            // OBTENER SOLICITUDES
+            // ============================
             const { data: solicitudesData, error: errorSolicitudes } =
                 await supabase
                     .from("solicitudes_adopcion")
@@ -99,27 +122,57 @@ export default function DashboardPage() {
 
                 <div className="rounded-2xl bg-white p-8 shadow-md">
 
-                    <h1 className="text-4xl font-bold text-gray-900">
-                        Dashboard
-                    </h1>
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <h1 className="text-4xl font-bold text-gray-900">
+                                Dashboard
+                            </h1>
+
+                            <p className="mt-2 text-gray-600">
+                                Bienvenido a tu panel de AdoptaHogar.
+                            </p>
+                        </div>
+
+                        <a
+                            href="/"
+                            className="rounded-full border-2 border-orange-500 px-5 py-2 text-center font-semibold text-orange-600 transition hover:bg-orange-50"
+                        >
+                            ← Volver al inicio
+                        </a>
+                    </div>
 
                     {cargando ? (
-                        <p className="mt-4 text-gray-600">
+                        <p className="mt-6 text-gray-600">
                             Cargando información...
                         </p>
                     ) : error ? (
-                        <p className="mt-4 rounded-lg bg-red-50 p-4 text-red-600">
+                        <p className="mt-6 rounded-lg bg-red-50 p-4 text-red-600">
                             {error}
                         </p>
                     ) : (
                         <>
-                            <p className="mt-4 text-gray-600">
-                                Bienvenido a tu panel de AdoptaHogar.
-                            </p>
-
-                            <p className="mt-2 font-semibold text-orange-600">
+                            <p className="mt-6 font-semibold text-orange-600">
                                 Usuario: {email}
                             </p>
+
+                            <p className="mt-2 text-gray-600">
+                                Rol:{" "}
+                                <span className="font-semibold capitalize">
+                                    {rol}
+                                </span>
+                            </p>
+
+                            {/* BOTÓN SOLO PARA REFUGIO */}
+                            {rol === "refugio" && (
+                                <div className="mt-6">
+                                    <a
+                                        href="/dashboard/mascotas"
+                                        className="inline-block rounded-full bg-orange-500 px-6 py-3 font-bold text-white shadow-md transition hover:bg-orange-600"
+                                    >
+                                        🐾 Administrar mis mascotas
+                                    </a>
+                                </div>
+                            )}
 
                             <div className="mt-10">
                                 <h2 className="text-2xl font-bold text-gray-900">
@@ -173,7 +226,6 @@ export default function DashboardPage() {
                     )}
 
                 </div>
-
             </div>
         </main>
     );

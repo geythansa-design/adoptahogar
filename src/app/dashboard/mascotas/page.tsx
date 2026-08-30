@@ -3,13 +3,23 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+interface Mascota {
+    id: number;
+    nombre: string;
+    tipo: string;
+    edad: string;
+    descripcion: string;
+    imagen: string | null;
+    estado: string;
+}
+
 export default function MisMascotasPage() {
-    const [rol, setRol] = useState("");
+    const [mascotas, setMascotas] = useState<Mascota[]>([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        async function cargarPerfil() {
+        async function cargarMascotas() {
             const {
                 data: { user },
             } = await supabase.auth.getUser();
@@ -28,16 +38,37 @@ export default function MisMascotasPage() {
 
             if (errorPerfil) {
                 console.error(errorPerfil);
-                setError("No se pudo obtener el rol del usuario.");
+                setError("No se pudo comprobar el rol del usuario.");
                 setCargando(false);
                 return;
             }
 
-            setRol(perfil.rol);
+            if (perfil.rol !== "refugio") {
+                setError("No tienes permisos para administrar mascotas.");
+                setCargando(false);
+                return;
+            }
+
+            const { data, error: errorMascotas } = await supabase
+                .from("mascotas")
+                .select(
+                    "id, nombre, tipo, edad, descripcion, imagen, estado"
+                )
+                .eq("usuario_id", user.id)
+                .order("created_at", { ascending: false });
+
+            if (errorMascotas) {
+                console.error(errorMascotas);
+                setError("No se pudieron cargar las mascotas.");
+                setCargando(false);
+                return;
+            }
+
+            setMascotas(data ?? []);
             setCargando(false);
         }
 
-        cargarPerfil();
+        cargarMascotas();
     }, []);
 
     if (cargando) {
@@ -45,7 +76,7 @@ export default function MisMascotasPage() {
             <main className="min-h-screen bg-orange-50 px-6 py-12">
                 <div className="mx-auto max-w-6xl">
                     <p className="text-gray-600">
-                        Cargando información...
+                        Cargando mascotas...
                     </p>
                 </div>
             </main>
@@ -56,28 +87,9 @@ export default function MisMascotasPage() {
         return (
             <main className="min-h-screen bg-orange-50 px-6 py-12">
                 <div className="mx-auto max-w-6xl">
-                    <p className="rounded-lg bg-red-50 p-4 text-red-600">
-                        {error}
-                    </p>
-                </div>
-            </main>
-        );
-    }
-
-    if (rol !== "refugio") {
-        return (
-            <main className="min-h-screen bg-orange-50 px-6 py-12">
-                <div className="mx-auto max-w-6xl">
-                    <div className="rounded-2xl bg-white p-8 text-center shadow-md">
-                        <div className="text-5xl">🔒</div>
-
-                        <h1 className="mt-4 text-3xl font-bold text-gray-900">
-                            Acceso restringido
-                        </h1>
-
-                        <p className="mt-3 text-gray-600">
-                            Esta sección está disponible únicamente para
-                            usuarios con rol de refugio.
+                    <div className="rounded-2xl bg-white p-8 shadow-md">
+                        <p className="rounded-lg bg-red-50 p-4 text-red-600">
+                            {error}
                         </p>
 
                         <a
@@ -95,6 +107,7 @@ export default function MisMascotasPage() {
     return (
         <main className="min-h-screen bg-orange-50 px-6 py-12">
             <div className="mx-auto max-w-6xl">
+
                 <div className="rounded-2xl bg-white p-8 shadow-md">
 
                     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -104,36 +117,71 @@ export default function MisMascotasPage() {
                             </h1>
 
                             <p className="mt-3 text-gray-600">
-                                Aquí podrás administrar las mascotas que has
-                                publicado.
+                                Mascotas publicadas por este refugio.
                             </p>
                         </div>
 
-                        <span className="w-fit rounded-full bg-orange-100 px-4 py-2 font-semibold text-orange-700">
-                            Rol: {rol}
-                        </span>
-                    </div>
-
-                    <div className="mt-10 rounded-2xl border border-orange-100 bg-orange-50 p-6">
-                        <h2 className="text-2xl font-bold text-gray-900">
-                            Gestión de mascotas 🐾
-                        </h2>
-
-                        <p className="mt-2 text-gray-600">
-                            Como usuario de refugio, aquí podrás crear,
-                            consultar, editar y eliminar las mascotas
-                            disponibles para adopción.
-                        </p>
-
-                        <button
-                            type="button"
-                            className="mt-6 rounded-full bg-orange-500 px-6 py-3 font-bold text-white transition hover:bg-orange-600"
+                        <a
+                            href="/dashboard"
+                            className="w-fit rounded-full border-2 border-orange-500 px-5 py-2 font-semibold text-orange-600 transition hover:bg-orange-50"
                         >
-                            + Agregar mascota
-                        </button>
+                            ← Dashboard
+                        </a>
                     </div>
+
+                    {mascotas.length === 0 ? (
+                        <div className="mt-10 rounded-2xl bg-orange-50 p-8 text-center">
+                            <p className="text-gray-600">
+                                Todavía no has registrado mascotas.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+
+                            {mascotas.map((mascota) => (
+                                <div
+                                    key={mascota.id}
+                                    className="overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-sm"
+                                >
+                                    <div className="h-48 bg-orange-100">
+                                        {mascota.imagen ? (
+                                            <img
+                                                src={mascota.imagen}
+                                                alt={`Foto de ${mascota.nombre}`}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="flex h-full items-center justify-center text-6xl">
+                                                🐾
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="p-5">
+                                        <h2 className="text-2xl font-bold text-gray-900">
+                                            {mascota.nombre}
+                                        </h2>
+
+                                        <p className="mt-2 text-gray-600">
+                                            {mascota.tipo} · {mascota.edad}
+                                        </p>
+
+                                        <p className="mt-3 text-sm text-gray-600">
+                                            {mascota.descripcion}
+                                        </p>
+
+                                        <span className="mt-4 inline-block rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-700">
+                                            {mascota.estado}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+
+                        </div>
+                    )}
 
                 </div>
+
             </div>
         </main>
     );

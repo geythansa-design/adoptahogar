@@ -115,6 +115,10 @@ export default function ExplorarPage({
                                     {mascota.nombre}
                                 </h3>
 
+                                <p className="mt-2 text-center text-gray-600">
+                                    {mascota.edad}
+                                </p>
+
                                 <a
                                     href={`/mascotas/${mascota.id}?tipo=${tipoSeleccionado || mascota.tipo}`}
                                     className="mt-5 block w-full rounded-lg bg-orange-500 py-3 text-center font-semibold text-white transition hover:bg-orange-600"
