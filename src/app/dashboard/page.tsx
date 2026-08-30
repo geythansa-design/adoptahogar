@@ -19,6 +19,10 @@ type Mascota = {
 };
 
 export default function DashboardPage() {
+    async function cerrarSesion() {
+        await supabase.auth.signOut();
+        window.location.href = "/login";
+    }
     const [email, setEmail] = useState("");
     const [rol, setRol] = useState("");
     const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
@@ -154,6 +158,23 @@ export default function DashboardPage() {
                             <p className="mt-6 font-semibold text-orange-600">
                                 Usuario: {email}
                             </p>
+                            <div className="mt-6 flex flex-wrap gap-3">
+                                {rol === "refugio" && (
+                                    <a
+                                        href="/dashboard/mascotas"
+                                        className="rounded-full bg-orange-500 px-6 py-3 font-bold text-white transition hover:bg-orange-600"
+                                    >
+                                        🐾 Administrar mis mascotas
+                                    </a>
+                                )}
+
+                                <button
+                                    onClick={cerrarSesion}
+                                    className="rounded-full border-2 border-red-500 px-6 py-3 font-bold text-red-500 transition hover:bg-red-50"
+                                >
+                                    Cerrar sesión
+                                </button>
+                            </div>
 
                             <p className="mt-2 text-gray-600">
                                 Rol:{" "}
@@ -161,18 +182,6 @@ export default function DashboardPage() {
                                     {rol}
                                 </span>
                             </p>
-
-                            {/* BOTÓN SOLO PARA REFUGIO */}
-                            {rol === "refugio" && (
-                                <div className="mt-6">
-                                    <a
-                                        href="/dashboard/mascotas"
-                                        className="inline-block rounded-full bg-orange-500 px-6 py-3 font-bold text-white shadow-md transition hover:bg-orange-600"
-                                    >
-                                        🐾 Administrar mis mascotas
-                                    </a>
-                                </div>
-                            )}
 
                             <div className="mt-10">
                                 <h2 className="text-2xl font-bold text-gray-900">
