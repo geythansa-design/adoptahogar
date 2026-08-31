@@ -1,11 +1,14 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const redirect = searchParams.get("redirect");
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -18,19 +21,49 @@ export default function LoginPage() {
         setError("");
         setCargando(true);
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
         });
 
-        if (error) {
+        if (error || !data.user) {
             setError("Correo o contraseña incorrectos.");
             setCargando(false);
             return;
         }
 
-        router.push("/dashboard");
-        router.refresh();
+        const { data: perfil, error: errorPerfil } = await supabase
+            .from("perfiles")
+            .select("rol")
+            .eq("id", data.user.id)
+            .single();
+
+        if (errorPerfil || !perfil) {
+            setError("No se pudo identificar el tipo de usuario.");
+            setCargando(false);
+            return;
+        }
+
+        if (redirect && perfil.rol === "adoptante") {
+            router.push(redirect);
+            router.refresh();
+            return;
+        }
+
+        if (perfil.rol === "refugio") {
+            router.push("/dashboard");
+            router.refresh();
+            return;
+        }
+
+        if (perfil.rol === "adoptante") {
+            router.push("/explorar");
+            router.refresh();
+            return;
+        }
+
+        setError("El rol de usuario no es válido.");
+        setCargando(false);
     }
 
     return (
@@ -100,10 +133,21 @@ export default function LoginPage() {
                         disabled={cargando}
                         className="w-full rounded-full bg-orange-500 py-3 font-bold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        {cargando ? "Iniciando sesión..." : "Iniciar sesión"}
+                        {cargando
+                            ? "Iniciando sesión..."
+                            : "Iniciar sesión"}
                     </button>
 
                 </form>
+
+                <div className="mt-4 text-center">
+                    <a
+                        href="/recuperar-password"
+                        className="text-sm font-semibold text-orange-600 hover:text-orange-700"
+                    >
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
 
                 <div className="mt-6 text-center text-sm text-gray-600">
                     ¿No tienes una cuenta?{" "}

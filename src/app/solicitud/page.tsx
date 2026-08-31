@@ -1,3 +1,4 @@
+
 "use client";
 
 import { FormEvent, useState } from "react";
@@ -44,7 +45,42 @@ export default function SolicitudPage() {
             return;
         }
 
-        const { error } = await supabase
+        // Verificar si el usuario ya tiene una solicitud para esta mascota
+        const { data: solicitudExistente, error: errorConsulta } =
+            await supabase
+                .from("solicitudes_adopcion")
+                .select("id, estado")
+                .eq("mascota_id", Number(mascotaId))
+                .eq("adoptante_id", user.id)
+                .in("estado", ["Pendiente", "Aprobada"])
+                .maybeSingle();
+
+        if (errorConsulta) {
+            console.error(errorConsulta);
+            setError(
+                "No se pudo comprobar si ya existe una solicitud para esta mascota."
+            );
+            setCargando(false);
+            return;
+        }
+
+        if (solicitudExistente) {
+            if (solicitudExistente.estado === "Aprobada") {
+                setError(
+                    `Ya tienes una solicitud aprobada para ${mascotaNombre || "esta mascota"}.`
+                );
+            } else {
+                setError(
+                    `Ya tienes una solicitud para ${mascotaNombre || "esta mascota"} en trámite. No puedes enviar otra solicitud mientras la anterior esté pendiente.`
+                );
+            }
+
+            setCargando(false);
+            return;
+        }
+
+        // Crear nueva solicitud
+        const { error: errorInsercion } = await supabase
             .from("solicitudes_adopcion")
             .insert({
                 mascota_id: Number(mascotaId),
@@ -53,9 +89,9 @@ export default function SolicitudPage() {
                 estado: "Pendiente",
             });
 
-        if (error) {
-            console.error(error);
-            setError(error.message);
+        if (errorInsercion) {
+            console.error(errorInsercion);
+            setError("No se pudo enviar la solicitud. Inténtalo nuevamente.");
             setCargando(false);
             return;
         }
@@ -115,8 +151,8 @@ export default function SolicitudPage() {
                         </p>
 
                         <p className="mt-1 text-sm text-gray-600">
-                            Tu solicitud será enviada como <strong>Pendiente</strong> para
-                            que pueda ser revisada.
+                            Tu solicitud será enviada como{" "}
+                            <strong>Pendiente</strong> para que pueda ser revisada.
                         </p>
                     </div>
 

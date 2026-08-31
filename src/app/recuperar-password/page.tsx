@@ -1,0 +1,111 @@
+
+"use client";
+
+import { FormEvent, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+export default function RecuperarPasswordPage() {
+    const [email, setEmail] = useState("");
+    const [mensaje, setMensaje] = useState("");
+    const [error, setError] = useState("");
+    const [cargando, setCargando] = useState(false);
+
+    async function enviarCorreo(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+
+        setMensaje("");
+        setError("");
+        setCargando(true);
+
+        const { error } = await supabase.auth.resetPasswordForEmail(
+            email,
+            {
+                redirectTo: `${window.location.origin}/restablecer-password`,
+            }
+        );
+
+        if (error) {
+            setError(error.message);
+            setCargando(false);
+            return;
+        }
+
+        setMensaje(
+            "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña."
+        );
+
+        setCargando(false);
+    }
+
+    return (
+        <main className="flex min-h-screen items-center justify-center bg-orange-50 px-6">
+            <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+
+                <div className="mb-8 text-center">
+                    <div className="text-5xl">🔐</div>
+
+                    <h1 className="mt-3 text-3xl font-extrabold text-orange-600">
+                        Recuperar contraseña
+                    </h1>
+
+                    <p className="mt-2 text-gray-600">
+                        Ingresa tu correo y te enviaremos un enlace para crear una nueva contraseña.
+                    </p>
+                </div>
+
+                <form onSubmit={enviarCorreo} className="space-y-5">
+
+                    <div>
+                        <label
+                            htmlFor="email"
+                            className="mb-2 block font-semibold text-gray-700"
+                        >
+                            Correo electrónico
+                        </label>
+
+                        <input
+                            id="email"
+                            type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="correo@ejemplo.com"
+                            className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                        />
+                    </div>
+
+                    {error && (
+                        <p className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                            {error}
+                        </p>
+                    )}
+
+                    {mensaje && (
+                        <p className="rounded-lg bg-green-50 p-3 text-sm text-green-600">
+                            {mensaje}
+                        </p>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={cargando}
+                        className="w-full rounded-full bg-orange-500 py-3 font-bold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                        {cargando ? "Enviando..." : "Enviar enlace"}
+                    </button>
+
+                </form>
+
+                <div className="mt-6 text-center">
+                    <a
+                        href="/login"
+                        className="text-sm font-semibold text-orange-600 hover:text-orange-700"
+                    >
+                        ← Volver al inicio de sesión
+                    </a>
+                </div>
+
+            </div>
+        </main>
+    );
+}
