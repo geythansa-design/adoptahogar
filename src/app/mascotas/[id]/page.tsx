@@ -26,7 +26,7 @@ export default async function MascotaDetallePage({
     const { data: mascota, error } = await supabase
         .from("mascotas")
         .select(
-            "id, nombre, tipo, edad, descripcion, imagen, estado"
+            "id, nombre, tipo, edad, descripcion, imagen, estado, sexo"
         )
         .eq("id", id)
         .single();
@@ -36,6 +36,7 @@ export default async function MascotaDetallePage({
             <main className="min-h-screen bg-orange-50 px-6 py-12">
                 <div className="mx-auto max-w-4xl">
                     <div className="rounded-2xl bg-white p-10 text-center shadow-md">
+
                         <h1 className="text-3xl font-bold text-gray-900">
                             Mascota no encontrada
                         </h1>
@@ -45,11 +46,12 @@ export default async function MascotaDetallePage({
                         </p>
 
                         <a
-                            href="/explorar"
+                            href="/"
                             className="mt-8 inline-block rounded-full bg-orange-500 px-6 py-3 font-bold text-white transition hover:bg-orange-600"
                         >
-                            ← Volver a mascotas
+                            ← Volver
                         </a>
+
                     </div>
                 </div>
             </main>
@@ -58,15 +60,18 @@ export default async function MascotaDetallePage({
 
     const datos = mascota as Mascota;
 
+    const esDisponible = datos.estado === "Disponible";
+
     return (
         <main className="min-h-screen bg-orange-50 px-6 py-12">
+
             <div className="mx-auto max-w-5xl">
 
                 <a
-                    href="/explorar"
+                    href="/"
                     className="mb-6 inline-block font-semibold text-orange-600 hover:text-orange-700"
                 >
-                    ← Volver a mascotas
+                    ← Volver
                 </a>
 
                 <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
@@ -112,18 +117,27 @@ export default async function MascotaDetallePage({
                             </div>
 
                             <div className="mt-6">
-                                <span className="inline-block rounded-full bg-green-100 px-4 py-2 font-semibold text-green-700">
+                                <span
+                                    className={`inline-block rounded-full px-4 py-2 font-semibold ${esDisponible
+                                        ? "bg-green-100 text-green-700"
+                                        : "bg-gray-100 text-gray-700"
+                                        }`}
+                                >
                                     {datos.estado}
                                 </span>
                             </div>
 
-                            {datos.estado === "Disponible" && (
+                            {esDisponible ? (
                                 <a
-                                    href={`/solicitud?mascota=${datos.id}`}
+                                    href={`/solicitud?mascota=${datos.id}&nombre=${encodeURIComponent(datos.nombre)}`}
                                     className="mt-8 block w-full rounded-full bg-orange-500 px-6 py-4 text-center font-bold text-white transition hover:bg-orange-600"
                                 >
                                     🐾 Quiero adoptar
                                 </a>
+                            ) : (
+                                <div className="mt-8 rounded-xl bg-gray-100 p-4 text-center font-semibold text-gray-600">
+                                    Esta mascota no está disponible para adopción.
+                                </div>
                             )}
 
                         </div>
