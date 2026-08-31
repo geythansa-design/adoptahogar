@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 
+interface RazaPerro {
+  nombre: string;
+}
+
 const mascotas = [
   {
     id: 1,
@@ -47,6 +51,8 @@ const mascotas = [
 
 export default function Home() {
   const [menuMascotasAbierto, setMenuMascotasAbierto] = useState(false);
+  const [razas, setRazas] = useState<RazaPerro[]>([]);
+  const [errorApi, setErrorApi] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -54,6 +60,34 @@ export default function Home() {
     if (params.get("menu") === "mascotas") {
       setMenuMascotasAbierto(true);
     }
+  }, []);
+
+  useEffect(() => {
+    async function cargarRazas() {
+      try {
+        const respuesta = await fetch(
+          "https://dog.ceo/api/breeds/list/all"
+        );
+
+        if (!respuesta.ok) {
+          throw new Error("No se pudo obtener la información");
+        }
+
+        const datos = await respuesta.json();
+
+        const nombres = Object.keys(datos.message)
+          .slice(0, 6)
+          .map((nombre) => ({
+            nombre: nombre.charAt(0).toUpperCase() + nombre.slice(1),
+          }));
+
+        setRazas(nombres);
+      } catch (error) {
+        setErrorApi("No se pudo cargar la información de la API.");
+      }
+    }
+
+    cargarRazas();
   }, []);
 
   return (
@@ -268,6 +302,61 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ==================== API EXTERNA ==================== */}
+      <section className="bg-orange-50 px-6 py-16">
+        <div className="mx-auto max-w-6xl text-center">
+
+          <span className="font-semibold text-orange-500">
+            INFORMACIÓN EXTERNA
+          </span>
+
+          <h2 className="mt-2 text-3xl font-extrabold text-gray-900">
+            Razas de perros
+          </h2>
+
+          <p className="mx-auto mt-4 max-w-2xl text-gray-600">
+            Consulta información de razas obtenida dinámicamente desde una
+            API externa.
+          </p>
+
+          {errorApi ? (
+            <div className="mt-8 rounded-2xl bg-white p-6 text-red-600 shadow-md">
+              {errorApi}
+            </div>
+          ) : razas.length === 0 ? (
+            <div className="mt-8 rounded-2xl bg-white p-6 text-gray-600 shadow-md">
+              Cargando información...
+            </div>
+          ) : (
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+
+              {razas.map((raza) => (
+                <div
+                  key={raza.nombre}
+                  className="rounded-2xl bg-white p-6 shadow-md transition hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="text-5xl">🐶</div>
+
+                  <h3 className="mt-4 text-xl font-bold text-gray-900">
+                    {raza.nombre}
+                  </h3>
+
+                  <p className="mt-2 text-sm text-gray-500">
+                    Raza obtenida desde una API externa.
+                  </p>
+                </div>
+              ))}
+
+            </div>
+          )}
+
+          <p className="mt-8 text-xs text-gray-400">
+            Información obtenida mediante fetch desde Dog CEO API.
+          </p>
+
+        </div>
+      </section>
+
       {/* ==================== CONTACTO ==================== */}
       <section
         id="contacto"
@@ -308,3 +397,7 @@ export default function Home() {
     </main>
   );
 }
+function setRazas(nombres: { nombre: string; }[]) {
+  throw new Error("Function not implemented.");
+}
+
