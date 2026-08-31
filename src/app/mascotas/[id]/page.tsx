@@ -1,156 +1,134 @@
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+);
+
 interface Mascota {
     id: number;
     nombre: string;
     tipo: string;
     edad: string;
-    imagen: string;
     descripcion: string;
+    imagen: string | null;
+    estado: string;
 }
 
-const mascotas: Mascota[] = [
-    {
-        id: 2,
-        nombre: "Max",
-        tipo: "Perro",
-        edad: "2 años",
-        imagen: "/mascotas/Toby (4).png",
-        descripcion: "Cariñoso, juguetón y muy amigable.",
-    },
-    {
-        id: 3,
-        nombre: "Zeus",
-        tipo: "Gato",
-        edad: "1 año",
-        imagen: "/mascotas/Toby (2).png",
-        descripcion: "Tranquilo, cariñoso y muy tierno.",
-    },
-    {
-        id: 4,
-        nombre: "Rocky",
-        tipo: "Perro",
-        edad: "3 años",
-        imagen: "/mascotas/Toby (5).png",
-        descripcion: "Protector, alegre y lleno de energía.",
-    },
-    {
-        id: 5,
-        nombre: "Luna",
-        tipo: "Gata",
-        edad: "8 meses",
-        imagen: "/mascotas/Toby (3).png",
-        descripcion: "Dulce, curiosa y muy cariñosa.",
-    },
-    {
-        id: 6,
-        nombre: "Toby",
-        tipo: "Perro",
-        edad: "1 año",
-        imagen: "/mascotas/Toby (1).png",
-        descripcion: "Juguetón, obediente y lleno de alegría.",
-    },
-];
-
-interface MascotaDetalleProps {
-    params: {
-        id: string;
-    };
-    searchParams: {
-        tipo?: string;
-    };
-}
-
-export default function MascotaDetallePage({
+export default async function MascotaDetallePage({
     params,
-    searchParams,
-}: MascotaDetalleProps) {
-    const mascota = mascotas.find(
-        (item) => item.id === Number(params.id)
-    );
+}: {
+    params: { id: string };
+}) {
+    const id = Number(params.id);
 
-    const volverA = searchParams.tipo
-        ? `/explorar?tipo=${searchParams.tipo}`
-        : "/explorar";
+    const { data: mascota, error } = await supabase
+        .from("mascotas")
+        .select(
+            "id, nombre, tipo, edad, descripcion, imagen, estado"
+        )
+        .eq("id", id)
+        .single();
 
-    if (!mascota) {
+    if (error || !mascota) {
         return (
             <main className="min-h-screen bg-orange-50 px-6 py-12">
-                <div className="mx-auto max-w-4xl text-center">
-                    <h1 className="text-4xl font-extrabold text-gray-900">
-                        Mascota no encontrada
-                    </h1>
+                <div className="mx-auto max-w-4xl">
+                    <div className="rounded-2xl bg-white p-10 text-center shadow-md">
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            Mascota no encontrada
+                        </h1>
 
-                    <p className="mt-4 text-gray-600">
-                        La mascota que buscas no existe.
-                    </p>
+                        <p className="mt-4 text-gray-600">
+                            La mascota que buscas no existe.
+                        </p>
 
-                    <a
-                        href={volverA}
-                        className="mt-6 inline-block rounded-full bg-orange-500 px-5 py-2 font-semibold text-white transition hover:bg-orange-600"
-                    >
-                        ← Volver
-                    </a>
+                        <a
+                            href="/explorar"
+                            className="mt-8 inline-block rounded-full bg-orange-500 px-6 py-3 font-bold text-white transition hover:bg-orange-600"
+                        >
+                            ← Volver a mascotas
+                        </a>
+                    </div>
                 </div>
             </main>
         );
     }
 
+    const datos = mascota as Mascota;
+
     return (
-        <main className="min-h-screen bg-orange-50 text-gray-800">
-            {/* NAVBAR */}
-            <nav className="bg-white shadow-sm">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-                    <div className="flex items-center gap-2">
-                        <span className="text-3xl">🐾</span>
+        <main className="min-h-screen bg-orange-50 px-6 py-12">
+            <div className="mx-auto max-w-5xl">
 
-                        <h1 className="text-2xl font-bold text-orange-600">
-                            AdoptaHogar
-                        </h1>
+                <a
+                    href="/explorar"
+                    className="mb-6 inline-block font-semibold text-orange-600 hover:text-orange-700"
+                >
+                    ← Volver a mascotas
+                </a>
+
+                <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
+
+                    <div className="grid md:grid-cols-2">
+
+                        <div className="h-96 bg-orange-100 md:h-full">
+                            {datos.imagen ? (
+                                <img
+                                    src={datos.imagen}
+                                    alt={`Foto de ${datos.nombre}`}
+                                    className="h-full w-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex h-full min-h-96 items-center justify-center text-8xl">
+                                    🐾
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-8 md:p-10">
+
+                            <span className="font-semibold text-orange-500">
+                                CONOCE A
+                            </span>
+
+                            <h1 className="mt-2 text-4xl font-extrabold text-gray-900">
+                                {datos.nombre}
+                            </h1>
+
+                            <p className="mt-4 text-lg text-gray-600">
+                                {datos.tipo} · {datos.edad}
+                            </p>
+
+                            <div className="mt-8">
+                                <h2 className="text-xl font-bold text-gray-900">
+                                    Sobre {datos.nombre}
+                                </h2>
+
+                                <p className="mt-3 leading-7 text-gray-600">
+                                    {datos.descripcion}
+                                </p>
+                            </div>
+
+                            <div className="mt-6">
+                                <span className="inline-block rounded-full bg-green-100 px-4 py-2 font-semibold text-green-700">
+                                    {datos.estado}
+                                </span>
+                            </div>
+
+                            {datos.estado === "Disponible" && (
+                                <a
+                                    href={`/solicitud?mascota=${datos.id}`}
+                                    className="mt-8 block w-full rounded-full bg-orange-500 px-6 py-4 text-center font-bold text-white transition hover:bg-orange-600"
+                                >
+                                    🐾 Quiero adoptar
+                                </a>
+                            )}
+
+                        </div>
                     </div>
-
-                    <a
-                        href={volverA}
-                        className="rounded-full bg-orange-500 px-5 py-2 font-semibold text-white transition hover:bg-orange-600"
-                    >
-                        ← Volver
-                    </a>
                 </div>
-            </nav>
-
-            {/* DETALLE */}
-            <section className="mx-auto max-w-5xl px-6 py-16">
-                <div className="grid overflow-hidden rounded-3xl bg-white shadow-xl md:grid-cols-2">
-
-                    {/* IMAGEN */}
-                    <div className="h-[450px] bg-orange-100">
-                        <img
-                            src={mascota.imagen}
-                            alt={`Foto de ${mascota.nombre}`}
-                            className="h-full w-full object-cover"
-                        />
-                    </div>
-
-                    {/* INFORMACIÓN */}
-                    <div className="flex flex-col justify-center p-8 md:p-12">
-
-                        <span className="w-fit rounded-full bg-orange-100 px-4 py-2 text-sm font-semibold text-orange-600">
-                            🐾 {mascota.tipo}
-                        </span>
-
-                        <h2 className="mt-5 text-5xl font-extrabold text-gray-900">
-                            {mascota.nombre}
-                        </h2>
-
-                        <p className="mt-4 text-lg text-gray-600">
-                            Edad: {mascota.edad}
-                        </p>
-
-                        <p className="mt-6 text-lg leading-relaxed text-gray-600">
-                            {mascota.descripcion}
-                        </p>
-
-                    </div>
-                </div>
-            </section>
+            </div>
         </main>
     );
 }

@@ -121,12 +121,21 @@ export default function MisMascotasPage() {
                             </p>
                         </div>
 
-                        <a
-                            href="/dashboard"
-                            className="w-fit rounded-full border-2 border-orange-500 px-5 py-2 font-semibold text-orange-600 transition hover:bg-orange-50"
-                        >
-                            ← Dashboard
-                        </a>
+                        <div className="flex flex-wrap gap-3">
+                            <a
+                                href="/dashboard/mascotas/nueva"
+                                className="w-fit rounded-full bg-orange-500 px-5 py-2 font-semibold text-white transition hover:bg-orange-600"
+                            >
+                                + Agregar mascota
+                            </a>
+
+                            <a
+                                href="/dashboard"
+                                className="w-fit rounded-full border-2 border-orange-500 px-5 py-2 font-semibold text-orange-600 transition hover:bg-orange-50"
+                            >
+                                ← Dashboard
+                            </a>
+                        </div>
                     </div>
 
                     {mascotas.length === 0 ? (

@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+async function cerrarSesion() {
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+}
+
 type Solicitud = {
     id: number;
     mascota_id: number;

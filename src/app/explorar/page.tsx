@@ -1,66 +1,55 @@
-const mascotas = [
-    {
-        id: 2,
-        nombre: "Max",
-        tipo: "Perro",
-        edad: "2 años",
-        imagen: "/mascotas/Toby (4).png",
-        descripcion: "Cariñoso, juguetón y muy amigable.",
-    },
-    {
-        id: 3,
-        nombre: "Zeus",
-        tipo: "Gato",
-        edad: "1 año",
-        imagen: "/mascotas/Toby (2).png",
-        descripcion: "Tranquilo, cariñoso y muy tierno.",
-    },
-    {
-        id: 4,
-        nombre: "Rocky",
-        tipo: "Perro",
-        edad: "3 años",
-        imagen: "/mascotas/Toby (5).png",
-        descripcion: "Protector, alegre y lleno de energía.",
-    },
-    {
-        id: 5,
-        nombre: "Luna",
-        tipo: "Gata",
-        edad: "8 meses",
-        imagen: "/mascotas/Toby (3).png",
-        descripcion: "Dulce, curiosa y muy cariñosa.",
-    },
-    {
-        id: 6,
-        nombre: "Toby",
-        tipo: "Perro",
-        edad: "1 año",
-        imagen: "/mascotas/Toby (1).png",
-        descripcion: "Juguetón, obediente y lleno de alegría.",
-    },
-];
+import { createClient } from "@supabase/supabase-js";
 
-export default function ExplorarPage({
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+);
+
+interface Mascota {
+    id: number;
+    nombre: string;
+    tipo: string;
+    edad: string;
+    imagen: string | null;
+    descripcion: string;
+    estado: string;
+}
+
+export default async function ExplorarPage({
     searchParams,
 }: {
     searchParams: { tipo?: string };
 }) {
     const tipoSeleccionado = searchParams.tipo;
 
-    const mascotasFiltradas = tipoSeleccionado
-        ? mascotas.filter((mascota) =>
-            tipoSeleccionado === "Gato"
-                ? mascota.tipo === "Gato" || mascota.tipo === "Gata"
-                : mascota.tipo === tipoSeleccionado
+    const { data: mascotas, error } = await supabase
+        .from("mascotas")
+        .select(
+            "id, nombre, tipo, edad, imagen, descripcion, estado"
         )
-        : mascotas;
+        .eq("estado", "Disponible")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        console.error(error);
+    }
+
+    const mascotasFiltradas = (mascotas ?? []).filter((mascota: Mascota) => {
+        if (!tipoSeleccionado) return true;
+
+        if (tipoSeleccionado === "Gato") {
+            return mascota.tipo === "Gato" || mascota.tipo === "Gata";
+        }
+
+        return mascota.tipo === tipoSeleccionado;
+    });
 
     return (
         <main className="min-h-screen bg-orange-50 text-gray-800">
-            {/* ENCABEZADO */}
+
             <nav className="bg-white shadow-sm">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+
                     <div className="flex items-center gap-2">
                         <span className="text-3xl">🐾</span>
 
@@ -78,9 +67,10 @@ export default function ExplorarPage({
                 </div>
             </nav>
 
-            {/* TÍTULO */}
             <section className="mx-auto max-w-7xl px-6 py-16">
+
                 <div className="mb-12 text-center">
+
                     <span className="font-semibold text-orange-500">
                         NUESTRAS MASCOTAS
                     </span>
@@ -90,46 +80,84 @@ export default function ExplorarPage({
                     </h2>
 
                     <p className="mx-auto mt-4 max-w-2xl text-gray-600">
-                        Ellos están esperando encontrar una familia que les dé el amor y
-                        cuidado que merecen.
+                        Ellos están esperando encontrar una familia que les dé
+                        el amor y cuidado que merecen.
                     </p>
+
                 </div>
 
-                {/* TARJETAS */}
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    {mascotasFiltradas.map((mascota) => (
-                        <div
-                            key={mascota.id}
-                            className="overflow-hidden rounded-2xl bg-white shadow-md transition duration-300 hover:-translate-y-2 hover:shadow-xl"
-                        >
-                            <div className="h-56 overflow-hidden bg-orange-100">
-                                <img
-                                    src={mascota.imagen}
-                                    alt={`Foto de ${mascota.nombre}`}
-                                    className="h-full w-full object-cover"
-                                />
+                {mascotasFiltradas.length === 0 ? (
+
+                    <div className="rounded-2xl bg-white p-10 text-center shadow-md">
+                        <p className="text-lg text-gray-600">
+                            No hay mascotas disponibles en este momento.
+                        </p>
+                    </div>
+
+                ) : (
+
+                    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+
+                        {mascotasFiltradas.map((mascota: Mascota) => (
+
+                            <div
+                                key={mascota.id}
+                                className="overflow-hidden rounded-2xl bg-white shadow-md transition duration-300 hover:-translate-y-2 hover:shadow-xl"
+                            >
+
+                                <div className="h-56 overflow-hidden bg-orange-100">
+
+                                    {mascota.imagen ? (
+
+                                        <img
+                                            src={mascota.imagen}
+                                            alt={`Foto de ${mascota.nombre}`}
+                                            className="h-full w-full object-cover"
+                                        />
+
+                                    ) : (
+
+                                        <div className="flex h-full items-center justify-center text-6xl">
+                                            🐾
+                                        </div>
+
+                                    )}
+
+                                </div>
+
+                                <div className="p-6">
+
+                                    <h3 className="text-2xl font-bold text-gray-900 text-center">
+                                        {mascota.nombre}
+                                    </h3>
+
+                                    <p className="mt-2 text-center text-gray-600">
+                                        {mascota.tipo} · {mascota.edad}
+                                    </p>
+
+                                    <p className="mt-3 text-center text-sm text-gray-500">
+                                        {mascota.descripcion}
+                                    </p>
+
+                                    <a
+                                        href={`/mascotas/${mascota.id}?tipo=${mascota.tipo}`}
+                                        className="mt-5 block w-full rounded-lg bg-orange-500 py-3 text-center font-semibold text-white transition hover:bg-orange-600"
+                                    >
+                                        Ver mascota
+                                    </a>
+
+                                </div>
+
                             </div>
 
-                            <div className="p-6">
-                                <h3 className="text-2xl font-bold text-gray-900 text-center">
-                                    {mascota.nombre}
-                                </h3>
+                        ))}
 
-                                <p className="mt-2 text-center text-gray-600">
-                                    {mascota.edad}
-                                </p>
+                    </div>
 
-                                <a
-                                    href={`/mascotas/${mascota.id}?tipo=${tipoSeleccionado || mascota.tipo}`}
-                                    className="mt-5 block w-full rounded-lg bg-orange-500 py-3 text-center font-semibold text-white transition hover:bg-orange-600"
-                                >
-                                    Ver mascota
-                                </a>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                )}
+
             </section>
+
         </main>
     );
 }
