@@ -13,6 +13,7 @@ interface Mascota {
     imagen: string | null;
     descripcion: string;
     estado: string;
+    sexo: string;
 }
 
 export default async function ExplorarPage({
@@ -25,9 +26,8 @@ export default async function ExplorarPage({
     const { data: mascotas, error } = await supabase
         .from("mascotas")
         .select(
-            "id, nombre, tipo, edad, imagen, descripcion, estado"
+            "id, nombre, tipo, edad, imagen, descripcion, estado, sexo"
         )
-        .eq("estado", "Disponible")
         .order("created_at", { ascending: false });
 
     if (error) {
@@ -80,8 +80,8 @@ export default async function ExplorarPage({
                     </h2>
 
                     <p className="mx-auto mt-4 max-w-2xl text-gray-600">
-                        Ellos están esperando encontrar una familia que les dé
-                        el amor y cuidado que merecen.
+                        Conoce a nuestras mascotas y descubre cuáles están
+                        disponibles para adopción.
                     </p>
 
                 </div>
@@ -90,7 +90,7 @@ export default async function ExplorarPage({
 
                     <div className="rounded-2xl bg-white p-10 text-center shadow-md">
                         <p className="text-lg text-gray-600">
-                            No hay mascotas disponibles en este momento.
+                            No hay mascotas registradas en este momento.
                         </p>
                     </div>
 
@@ -139,6 +139,23 @@ export default async function ExplorarPage({
                                         {mascota.descripcion}
                                     </p>
 
+                                    <div className="mt-4 text-center">
+                                        <span
+                                            className={`inline-block rounded-full px-4 py-2 text-sm font-bold ${mascota.estado === "Disponible"
+                                                ? "bg-green-100 text-green-700"
+                                                : mascota.estado === "En proceso"
+                                                    ? "bg-yellow-100 text-yellow-700"
+                                                    : "bg-blue-100 text-blue-700"
+                                                }`}
+                                        >
+                                            {mascota.estado === "Adoptada" && mascota.sexo === "Macho"
+                                                ? "Adoptado"
+                                                : mascota.estado === "Adoptada" && mascota.sexo === "Hembra"
+                                                    ? "Adoptada"
+                                                    : mascota.estado}
+                                        </span>
+                                    </div>
+
                                     <a
                                         href={`/mascotas/${mascota.id}?tipo=${mascota.tipo}`}
                                         className="mt-5 block w-full rounded-lg bg-orange-500 py-3 text-center font-semibold text-white transition hover:bg-orange-600"
@@ -160,4 +177,5 @@ export default async function ExplorarPage({
 
         </main>
     );
+
 }

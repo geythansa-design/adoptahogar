@@ -13,6 +13,7 @@ interface Mascota {
     descripcion: string;
     imagen: string | null;
     estado: string;
+    sexo: string;
 }
 
 export default async function MascotaDetallePage({

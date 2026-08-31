@@ -282,9 +282,12 @@ export default function Home() {
             Explora nuestras mascotas y encuentra a tu nuevo mejor amigo.
           </p>
 
-          <button className="mt-7 rounded-full bg-orange-500 px-8 py-3 font-bold text-white transition hover:bg-orange-600">
-            Comenzar adopción 🐾
-          </button>
+          <a
+            href="/explorar"
+            className="mt-7 inline-block rounded-full bg-orange-500 px-8 py-3 font-bold text-white transition hover:bg-orange-600"
+          >
+            Explorar mascotas 🐾
+          </a>
         </div>
       </section>
 
