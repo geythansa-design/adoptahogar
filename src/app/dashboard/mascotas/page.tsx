@@ -11,6 +11,12 @@ interface Mascota {
     descripcion: string;
     imagen: string | null;
     estado: string;
+    sexo?: string;
+}
+
+interface Solicitud {
+    mascota_id: number;
+    estado: string;
 }
 
 export default function MisMascotasPage() {
@@ -52,7 +58,7 @@ export default function MisMascotasPage() {
             const { data, error: errorMascotas } = await supabase
                 .from("mascotas")
                 .select(
-                    "id, nombre, tipo, edad, descripcion, imagen, estado"
+                    "id, nombre, tipo, edad, descripcion, imagen, estado, sexo"
                 )
                 .eq("usuario_id", user.id)
                 .order("created_at", { ascending: false });
@@ -64,7 +70,86 @@ export default function MisMascotasPage() {
                 return;
             }
 
-            setMascotas(data ?? []);
+            const mascotasActuales = data ?? [];
+
+            if (mascotasActuales.length === 0) {
+                setMascotas([]);
+                setCargando(false);
+                return;
+            }
+
+            const idsMascotas = mascotasActuales.map(
+                (mascota) => mascota.id
+            );
+
+            const { data: solicitudes, error: errorSolicitudes } =
+                await supabase
+                    .from("solicitudes_adopcion")
+                    .select("mascota_id, estado")
+                    .in("mascota_id", idsMascotas);
+
+            if (errorSolicitudes) {
+                console.error(errorSolicitudes);
+                setError(
+                    "No se pudieron comprobar las solicitudes de adopción."
+                );
+                setCargando(false);
+                return;
+            }
+
+            const solicitudesData: Solicitud[] = solicitudes ?? [];
+
+            const mascotasSincronizadas = mascotasActuales.map((mascota) => {
+                const solicitudesMascota = solicitudesData.filter(
+                    (solicitud) =>
+                        solicitud.mascota_id === mascota.id
+                );
+
+                const tieneAprobada = solicitudesMascota.some(
+                    (solicitud) => solicitud.estado === "Aprobada"
+                );
+
+                const tienePendiente = solicitudesMascota.some(
+                    (solicitud) => solicitud.estado === "Pendiente"
+                );
+
+                let nuevoEstado = "Disponible";
+
+                if (tieneAprobada) {
+                    nuevoEstado = "Adoptada";
+                } else if (tienePendiente) {
+                    nuevoEstado = "En proceso";
+                }
+
+                return {
+                    ...mascota,
+                    estado: nuevoEstado,
+                };
+            });
+
+            // Sincronizar los estados en la base de datos
+            for (const mascota of mascotasSincronizadas) {
+                const mascotaOriginal = mascotasActuales.find(
+                    (item) => item.id === mascota.id
+                );
+
+                if (
+                    mascotaOriginal &&
+                    mascotaOriginal.estado !== mascota.estado
+                ) {
+                    const { error: errorActualizacion } = await supabase
+                        .from("mascotas")
+                        .update({ estado: mascota.estado })
+                        .eq("id", mascota.id)
+                        .eq("usuario_id", user.id);
+
+                    if (errorActualizacion) {
+                        console.error(errorActualizacion);
+                    }
+                }
+            }
+
+            setMascotas(mascotasSincronizadas);
             setCargando(false);
         }
 
@@ -107,9 +192,7 @@ export default function MisMascotasPage() {
     return (
         <main className="min-h-screen bg-orange-50 px-6 py-12">
             <div className="mx-auto max-w-6xl">
-
                 <div className="rounded-2xl bg-white p-8 shadow-md">
-
                     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                         <div>
                             <h1 className="text-4xl font-bold text-gray-900">
@@ -146,7 +229,6 @@ export default function MisMascotasPage() {
                         </div>
                     ) : (
                         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-
                             {mascotas.map((mascota) => (
                                 <div
                                     key={mascota.id}
@@ -179,18 +261,25 @@ export default function MisMascotasPage() {
                                             {mascota.descripcion}
                                         </p>
 
-                                        <span className="mt-4 inline-block rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-700">
-                                            {mascota.estado}
+                                        <span
+                                            className={`mt-4 inline-block rounded-full px-4 py-2 text-sm font-semibold ${mascota.estado === "Disponible"
+                                                    ? "bg-green-100 text-green-700"
+                                                    : mascota.estado === "En proceso"
+                                                        ? "bg-yellow-100 text-yellow-700"
+                                                        : "bg-blue-100 text-blue-700"
+                                                }`}
+                                        >
+                                            {mascota.estado === "Adoptada" &&
+                                                mascota.sexo === "Macho"
+                                                ? "Adoptado"
+                                                : mascota.estado}
                                         </span>
                                     </div>
                                 </div>
                             ))}
-
                         </div>
                     )}
-
                 </div>
-
             </div>
         </main>
     );
