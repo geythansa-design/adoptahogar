@@ -1,10 +1,10 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -66,7 +66,6 @@ export default function LoginPage() {
     return (
         <main className="flex min-h-screen items-center justify-center bg-orange-50 px-6">
             <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
-
                 <div className="mb-8 text-center">
                     <div className="text-5xl">🐾</div>
 
@@ -80,7 +79,6 @@ export default function LoginPage() {
                 </div>
 
                 <form onSubmit={iniciarSesion} className="space-y-5">
-
                     <div>
                         <label
                             htmlFor="email"
@@ -134,7 +132,6 @@ export default function LoginPage() {
                             ? "Iniciando sesión..."
                             : "Iniciar sesión"}
                     </button>
-
                 </form>
 
                 <div className="mt-4 text-center">
@@ -164,8 +161,21 @@ export default function LoginPage() {
                         ← Volver al inicio
                     </a>
                 </div>
-
             </div>
         </main>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense
+            fallback={
+                <main className="flex min-h-screen items-center justify-center bg-orange-50">
+                    <p className="text-gray-600">Cargando...</p>
+                </main>
+            }
+        >
+            <LoginForm />
+        </Suspense>
     );
 }

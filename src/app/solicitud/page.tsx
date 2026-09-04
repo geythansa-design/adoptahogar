@@ -1,26 +1,31 @@
-
 "use client";
 
-import { FormEvent, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function SolicitudPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
 
-    const mascotaId = searchParams.get("mascota");
-    const mascotaNombre = searchParams.get("nombre");
-
+    const [mascotaId, setMascotaId] = useState<string | null>(null);
+    const [mascotaNombre, setMascotaNombre] = useState<string | null>(null);
     const [mensaje, setMensaje] = useState("");
+    const [enviado, setEnviado] = useState(false);
     const [error, setError] = useState("");
     const [cargando, setCargando] = useState(false);
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+
+        setMascotaId(params.get("mascota"));
+        setMascotaNombre(params.get("nombre"));
+    }, []);
 
     async function enviarSolicitud(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        setMensaje("");
         setError("");
+        setEnviado(false);
         setCargando(true);
 
         const {
@@ -45,7 +50,6 @@ export default function SolicitudPage() {
             return;
         }
 
-        // Verificar si el usuario ya tiene una solicitud para esta mascota
         const { data: solicitudExistente, error: errorConsulta } =
             await supabase
                 .from("solicitudes_adopcion")
@@ -67,11 +71,13 @@ export default function SolicitudPage() {
         if (solicitudExistente) {
             if (solicitudExistente.estado === "Aprobada") {
                 setError(
-                    `Ya tienes una solicitud aprobada para ${mascotaNombre || "esta mascota"}.`
+                    `Ya tienes una solicitud aprobada para ${mascotaNombre || "esta mascota"
+                    }.`
                 );
             } else {
                 setError(
-                    `Ya tienes una solicitud para ${mascotaNombre || "esta mascota"} en trámite. No puedes enviar otra solicitud mientras la anterior esté pendiente.`
+                    `Ya tienes una solicitud para ${mascotaNombre || "esta mascota"
+                    } en trámite. No puedes enviar otra solicitud mientras la anterior esté pendiente.`
                 );
             }
 
@@ -79,7 +85,6 @@ export default function SolicitudPage() {
             return;
         }
 
-        // Crear nueva solicitud
         const { error: errorInsercion } = await supabase
             .from("solicitudes_adopcion")
             .insert({
@@ -96,7 +101,8 @@ export default function SolicitudPage() {
             return;
         }
 
-        setMensaje("¡Solicitud enviada correctamente!");
+        setEnviado(true);
+        setCargando(false);
 
         setTimeout(() => {
             router.push("/dashboard");
@@ -162,9 +168,9 @@ export default function SolicitudPage() {
                         </p>
                     )}
 
-                    {mensaje === "¡Solicitud enviada correctamente!" && (
+                    {enviado && (
                         <p className="mt-5 rounded-lg bg-green-50 p-3 text-sm text-green-600">
-                            {mensaje}
+                            ¡Solicitud enviada correctamente!
                         </p>
                     )}
 
