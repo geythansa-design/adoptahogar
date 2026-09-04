@@ -17,6 +17,8 @@ interface Mascota {
     raza: string | null;
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function ExplorarPage({
     searchParams,
 }: {
@@ -175,10 +177,10 @@ export default async function ExplorarPage({
 
                                             <span
                                                 className={`inline-block rounded-full px-4 py-2 text-sm font-bold ${mascota.estado === "Disponible"
-                                                        ? "bg-green-100 text-green-700"
-                                                        : mascota.estado === "En proceso"
-                                                            ? "bg-yellow-100 text-yellow-700"
-                                                            : "bg-blue-100 text-blue-700"
+                                                    ? "bg-green-100 text-green-700"
+                                                    : mascota.estado === "En proceso"
+                                                        ? "bg-yellow-100 text-yellow-700"
+                                                        : "bg-blue-100 text-blue-700"
                                                     }`}
                                             >
                                                 {mascota.estado === "Adoptada" &&

@@ -56,7 +56,6 @@ export default function SolicitudPage() {
                 .select("id, estado")
                 .eq("mascota_id", Number(mascotaId))
                 .eq("adoptante_id", user.id)
-                .in("estado", ["Pendiente", "Aprobada"])
                 .maybeSingle();
 
         if (errorConsulta) {
@@ -69,18 +68,9 @@ export default function SolicitudPage() {
         }
 
         if (solicitudExistente) {
-            if (solicitudExistente.estado === "Aprobada") {
-                setError(
-                    `Ya tienes una solicitud aprobada para ${mascotaNombre || "esta mascota"
-                    }.`
-                );
-            } else {
-                setError(
-                    `Ya tienes una solicitud para ${mascotaNombre || "esta mascota"
-                    } en trámite. No puedes enviar otra solicitud mientras la anterior esté pendiente.`
-                );
-            }
-
+            setError(
+                `Ya has enviado una solicitud para ${mascotaNombre || "esta mascota"}. No puedes enviar otra solicitud.`
+            );
             setCargando(false);
             return;
         }
