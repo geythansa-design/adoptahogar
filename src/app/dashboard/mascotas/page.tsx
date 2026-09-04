@@ -263,10 +263,10 @@ export default function MisMascotasPage() {
 
                                         <span
                                             className={`mt-4 inline-block rounded-full px-4 py-2 text-sm font-semibold ${mascota.estado === "Disponible"
-                                                    ? "bg-green-100 text-green-700"
-                                                    : mascota.estado === "En proceso"
-                                                        ? "bg-yellow-100 text-yellow-700"
-                                                        : "bg-blue-100 text-blue-700"
+                                                ? "bg-green-100 text-green-700"
+                                                : mascota.estado === "En proceso"
+                                                    ? "bg-yellow-100 text-yellow-700"
+                                                    : "bg-blue-100 text-blue-700"
                                                 }`}
                                         >
                                             {mascota.estado === "Adoptada" &&
@@ -274,6 +274,13 @@ export default function MisMascotasPage() {
                                                 ? "Adoptado"
                                                 : mascota.estado}
                                         </span>
+
+                                        <a
+                                            href={`/dashboard/mascotas/${mascota.id}/nueva`}
+                                            className="mt-4 block w-full rounded-full bg-orange-500 px-5 py-3 text-center font-bold text-white transition hover:bg-orange-600"
+                                        >
+                                            ✏️ Editar
+                                        </a>
                                     </div>
                                 </div>
                             ))}
