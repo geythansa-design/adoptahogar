@@ -46,19 +46,16 @@ export default function LoginPage() {
 
         if (redirect && perfil.rol === "adoptante") {
             router.push(redirect);
-            router.refresh();
             return;
         }
 
         if (perfil.rol === "refugio") {
             router.push("/dashboard");
-            router.refresh();
             return;
         }
 
         if (perfil.rol === "adoptante") {
             router.push("/explorar");
-            router.refresh();
             return;
         }
 

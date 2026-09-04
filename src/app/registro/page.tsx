@@ -151,7 +151,9 @@ export default function RegistroPage() {
                             type="password"
                             required
                             value={confirmarPassword}
-                            onChange={(e) => setConfirmarPassword(e.target.value)}
+                            onChange={(e) =>
+                                setConfirmarPassword(e.target.value)
+                            }
                             placeholder="Repite tu contraseña"
                             className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                         />
