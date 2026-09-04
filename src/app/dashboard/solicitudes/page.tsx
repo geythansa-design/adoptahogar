@@ -75,6 +75,8 @@ export default function SolicitudesPage() {
             }
 
             setMascotas(mascotasData ?? []);
+        } else {
+            setMascotas([]);
         }
 
         setCargando(false);
@@ -107,26 +109,46 @@ export default function SolicitudesPage() {
             return;
         }
 
-        let estadoMascota = "En proceso";
-
+        // Si se aprueba la solicitud, la mascota pasa a Adoptada.
         if (nuevoEstado === "Aprobada") {
-            estadoMascota = "Adoptada";
+            const { error: errorMascota } = await supabase
+                .from("mascotas")
+                .update({ estado: "Adoptada" })
+                .eq("id", solicitud.mascota_id);
+
+            if (errorMascota) {
+                console.error(errorMascota);
+                setError(
+                    "La solicitud fue aprobada, pero no se pudo actualizar el estado de la mascota."
+                );
+                setActualizando(null);
+                return;
+            }
         }
 
-        if (nuevoEstado === "Rechazada") {
-            estadoMascota = "Disponible";
+        // Si se rechaza una solicitud, NO modificamos
+        // el estado de la mascota.
+
+        await cargarSolicitudes();
+        setActualizando(null);
+    }
+
+    async function eliminarSolicitud(solicitud: Solicitud) {
+        if (solicitud.estado !== "Rechazada") {
+            return;
         }
 
-        const { error: errorMascota } = await supabase
-            .from("mascotas")
-            .update({ estado: estadoMascota })
-            .eq("id", solicitud.mascota_id);
+        setActualizando(solicitud.id);
+        setError("");
 
-        if (errorMascota) {
-            console.error(errorMascota);
-            setError(
-                "La solicitud cambió, pero no se pudo actualizar el estado de la mascota."
-            );
+        const { error } = await supabase
+            .from("solicitudes_adopcion")
+            .delete()
+            .eq("id", solicitud.id);
+
+        if (error) {
+            console.error(error);
+            setError("No se pudo eliminar la solicitud.");
             setActualizando(null);
             return;
         }
@@ -138,7 +160,6 @@ export default function SolicitudesPage() {
     return (
         <main className="min-h-screen bg-orange-50 px-6 py-12">
             <div className="mx-auto max-w-6xl">
-
                 <div className="rounded-2xl bg-white p-8 shadow-md">
 
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -197,7 +218,6 @@ export default function SolicitudesPage() {
                                         )}
 
                                         <div className="p-6">
-
                                             <h2 className="text-2xl font-bold text-gray-900">
                                                 {mascota?.nombre ?? "Mascota"}
                                             </h2>
@@ -238,7 +258,6 @@ export default function SolicitudesPage() {
 
                                             {solicitud.estado === "Pendiente" && (
                                                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-
                                                     <button
                                                         type="button"
                                                         disabled={
@@ -272,20 +291,39 @@ export default function SolicitudesPage() {
                                                     >
                                                         Rechazar
                                                     </button>
-
                                                 </div>
                                             )}
 
+                                            {solicitud.estado === "Rechazada" && (
+                                                <div className="mt-6">
+                                                    <button
+                                                        type="button"
+                                                        disabled={
+                                                            actualizando ===
+                                                            solicitud.id
+                                                        }
+                                                        onClick={() =>
+                                                            eliminarSolicitud(
+                                                                solicitud
+                                                            )
+                                                        }
+                                                        className="w-full rounded-full bg-gray-500 px-5 py-3 font-bold text-white transition hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                                    >
+                                                        {actualizando ===
+                                                            solicitud.id
+                                                            ? "Eliminando..."
+                                                            : "Eliminar solicitud"}
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 );
                             })}
                         </div>
                     )}
-
                 </div>
             </div>
         </main>
     );
-
 }
